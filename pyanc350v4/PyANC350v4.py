@@ -218,6 +218,13 @@ class Positioner:
         ANC.getActuatorType(self.device, axisNo, ctypes.byref(type_))
         return type_.value
 
+    actuator_types = {0: "linear", 1: "goniometer", 2: "rotator"}
+    def getActuatorTypeName(self, axisNo):
+        type_num = self.getActuatorType(axisNo)
+        return self.actuator_types[type_num]
+        
+
+
 
     def getAmplitude(self, axisNo):
         '''
@@ -345,7 +352,9 @@ class Positioner:
         '''
         position = ctypes.c_double()
         ANC.getPosition(self.device, axisNo, ctypes.byref(position))
-        return position.value
+
+        #the output is in SI units but we use um (also for input, see below). Conversion is done right here!
+        return position.value*1000000 #WE CONVERT FROM SI UNITS TO um HERE!
 
 
     def measureCapacitance(self, axisNo):
@@ -453,7 +462,13 @@ class Positioner:
         ANC.setFrequency(self.device, axisNo, ctypes.c_double(frequency))
 
 
-    def setTargetPosition(self, axisNo, target):
+    def setTargetPosition(self, axisNo, target): # We are using um as input for target!
+
+        #WE ARE USING um INPUT SO HAVE TO CONVERT IT BACK TO SI UNITS (see documentation below)!
+        target=target/1000000 #convert from um input to Si units since this is the input unit for the positioners (see function below)
+
+        
+        ANC.setTargetPosition(self.device, axisNo, ctypes.c_double(target))
         '''
         Sets the target position for automatic motion, see ANC_startAutoMove. For linear type actuators the position unit is m, for goniometers and rotators it is degree.
 
@@ -463,10 +478,13 @@ class Positioner:
         Returns
             None
         '''
-        ANC.setTargetPosition(self.device, axisNo, ctypes.c_double(target))
 
 
-    def setTargetRange(self, axisNo, targetRg):
+    def setTargetRange(self, axisNo, targetRg): # We are using um as input for targetRg!
+        
+        #WE ARE USING um INPUT SO HAVE TO CONVERT IT BACK TO SI UNITS (see documentation below)!
+        targetRg=targetRg/1000000 #convert from um input to Si units since this is the input unit for the positioners (see function below)
+        
         '''
         Defines the range around the target position where the target is considered to be reached.
 

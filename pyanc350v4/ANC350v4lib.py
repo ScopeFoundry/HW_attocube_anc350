@@ -62,6 +62,7 @@ def checkError(code,func,args):
     return code
 
 # import dll - Need to add dll location to PATH so ctypes can find both dlls
+print("here:", os.path.dirname(__file__))
 os.environ['PATH'] = os.path.dirname(__file__) + ';' + os.environ['PATH']
 
 num_bits = ctypes.sizeof(ctypes.c_voidp)*8 # 32 bit or 64 bit Windows
@@ -81,7 +82,7 @@ if not filecmp.cmp(dll_lib_bits, dll_lib):
     shutil.copyfile(dll_lib_bits, dll_lib)
 
 
-anc350v4 = ctypes.windll.LoadLibrary('anc350v4.dll')
+anc350v4 = ctypes.windll.LoadLibrary(dll_anc)
 
 #aliases for the strangely-named functions from the dll
 discover = getattr(anc350v4,"ANC_discover")
